@@ -5,10 +5,11 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../slice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [show, setShow] = useState(true);
   const [details, setDetails] = useState({ email: "", password: "" });
 
@@ -16,7 +17,7 @@ const Login = () => {
     setDetails({ ...details, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const { email, password } = details;
@@ -31,8 +32,15 @@ const Login = () => {
       return;
     }
 
-    console.log("Login submitted:", details);
-    dispatch(loginUser(details));
+    try {
+      const result = await dispatch(loginUser(details)).unwrap();
+      toast.success("Login successful ✅");
+      console.log("Server response:", result);
+    } catch (err) {
+      toast.error(err || "Login failed ❌");
+      // console.error("Login error:", err);
+    }
+
     setDetails({ email: "", password: "" });
   };
 

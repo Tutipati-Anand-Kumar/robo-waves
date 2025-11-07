@@ -1,6 +1,8 @@
 import React, { useRef, useState } from "react";
 import { MdDriveFileRenameOutline, MdEmail } from "react-icons/md";
 import { FaEye, FaEyeSlash, FaLock, FaLockOpen } from "react-icons/fa";
+import { IoMdCheckmarkCircle } from "react-icons/io";
+import { RxCrossCircled } from "react-icons/rx";
 import { validatePassword } from "val-pass";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
@@ -28,22 +30,25 @@ const Register = () => {
   const [cropBlob, setCropBlob] = useState(null);
   const [showCropper, setShowCropper] = useState(false);
 
+  // console.log(passerror[0]==['No Error Detected'])
   const handleChange = (e) => {
     setDetails({ ...details, [e.target.name]: e.target.value });
   };
 
   const handlePasswordChange = (e) => {
-    const value = e.target.value;
-    setDetails({ ...details, password: value });
-    setPassError(
-      value.trim() === ""
-        ? []
-        : validatePassword(value, 8).getAllValidationErrorMessage()
-    );
-    setPassMatchError(
-      details.confirmPassword && details.confirmPassword !== value
-    );
-  };
+  const value = e.target.value;
+  setDetails({ ...details, password: value });
+
+  const errors =
+    value.trim() === ""
+      ? []
+      : validatePassword(value, 8).getAllValidationErrorMessage();
+
+  // Ensure it's always an array
+  setPassError(Array.isArray(errors) ? errors : [errors].filter(Boolean));
+
+  setPassMatchError(details.confirmPassword && details.confirmPassword !== value);
+};
 
   const handleConfirmPasswordChange = (e) => {
     const value = e.target.value;
@@ -64,11 +69,12 @@ const Register = () => {
       toast.error("Email must include @gmail.com ❌");
       return;
     }
+  
     if (password !== confirmPassword) {
       toast.error("Passwords do not match ❌");
       return;
     }
-    if (Array.isArray(passerror) && passerror.length > 0) {
+    if (Array.isArray(passerror) && passerror.length > 1) {
       toast.error("Please fix password errors ❌");
       return;
     }
@@ -76,7 +82,7 @@ const Register = () => {
     try {
       const formData = new FormData();
       formData.append("username", username);
-      formData.append("email", email);
+      formData.append("email", email.toLowerCase());
       formData.append("password", password);
       if (cropBlob) formData.append("profilePhoto", cropBlob, "profile.jpg");
 
@@ -154,11 +160,13 @@ const Register = () => {
 
             {/* Password errors */}
             {passerror.length > 0 && (
-              <div className="flex flex-col gap-1 text-red-600 text-sm px-2">
+              <div className={`flex flex-col gap-1 text-sm px-2 ${passerror[0]==['No Error Detected']?"text-green-500":"text-red-600"}`}>
+                
                 {passerror.map((err, i) => (
                   <p key={i}>• {err}</p>
                 ))}
               </div>
+
             )}
 
             {/* Confirm Password */}
@@ -177,9 +185,9 @@ const Register = () => {
               />
               <span className="absolute right-3 top-2.5 text-purple-500 text-xl">
                 {details.password && details.confirmPassword && !passMatchError ? (
-                  <FaLockOpen className="text-green-600" />
+                  <IoMdCheckmarkCircle className="text-green-600" />
                 ) : (
-                  <FaLock
+                  <RxCrossCircled
                     className={`${
                       passMatchError ? "text-red-600" : "text-purple-500"
                     }`}
@@ -189,7 +197,7 @@ const Register = () => {
             </div>
             {passMatchError && (
               <div className="text-red-600 text-sm text-center font-medium">
-                Passwords do not match ❌
+                Passwords do not match 
               </div>
             )}
 
@@ -214,7 +222,7 @@ const Register = () => {
 
         {/* Profile Photo Upload */}
         <div className="w-full md:w-1/2 flex flex-col items-center justify-center">
-          <div className="w-28 h-28 border-2 border-purple-400 rounded-full flex items-center justify-center overflow-hidden bg-white/40 shadow-inner">
+          <div className="w-38 h-38 border-2 border-purple-400 rounded-full flex items-center justify-center overflow-hidden bg-white/40 shadow-inner">
             {profilePhoto ? (
               <img src={profilePhoto} alt="Profile" className="w-full h-full object-cover" />
             ) : (
@@ -224,7 +232,7 @@ const Register = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="#6b21a8"
-                className="w-16 h-16"
+                className="w-22 h-22"
               >
                 <path
                   strokeLinecap="round"
