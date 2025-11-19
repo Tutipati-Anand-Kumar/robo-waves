@@ -5,6 +5,7 @@ import { getAllArticles } from "../redux/slices/articleSlice";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import Logout from "./Logout";
+import Notification from './Notification';
 
 function Home() {
   const navigate = useNavigate();
@@ -13,8 +14,11 @@ function Home() {
 
   const { articles, status, error } = useSelector((state) => state.articles);
   const [showLogout, setShowLogout] = useState(false);
+  const [showNotification ,setShowNotification] = useState(false);
 
-
+  const toggleNotifications = () => {
+    setShowNotification(!showNotification);
+  };
   console.log(articles);
   
 
@@ -44,10 +48,10 @@ function Home() {
   console.log(articleList)
 
   return (
-    <div className="min-h-screen bg-[url('./image1.png')] bg-cover bg-center text-gray-800 font-sans ">
+    <div className="min-h-screen  text-gray-800 font-sans bg-[url('./image1.png')] bg-cover bg-center">
 
       {/* Navbar */}
-      <nav className="flex items-center justify-between border-b bg-white/20 backdrop-blur-0.1px px-6 py-3 shadow-sm sticky top-0 z-50">
+      <nav className="flex items-center justify-between border-b bg-white/20 backdrop-blur-md px-6 py-3 shadow-sm  sticky top-0 z-50">
         <div >
           <svg
   width="220"
@@ -105,13 +109,13 @@ function Home() {
             
             <span className="flex flex-row items-center content-center gap-1 font-semibold text-gray-900 hover:text-blue-900 cursor-pointer" > <FaHome />Home</span>
           </div>
-          <div>
+          <div className="">
 
-            <span className="text-gray-900 hover:text-blue-900 font-semibold cursor-pointer">About</span>
+            <span className="text-gray-900 hover:text-blue-900 font-semibold cursor-pointer" onClick={()=>{navigate("/about")}}>About</span>
           </div>
           <button
             onClick={() => navigate("/create-article")}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-800 text-white h-[33px] w-[100px] px-3 py-1.5 rounded-lg hover:shadow-md transition"
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-800 hover:from-purple-800 hover:to-blue-500 text-white h-[33px] w-[100px] px-3 py-1.5 rounded-lg hover:shadow-md transition cursor-pointer "
           >
             <FaPlus /> Create
           </button>
@@ -119,7 +123,7 @@ function Home() {
           <button
             onClick={() => setShowLogout(true)}
             // className="px-6 py-2 font-semibold text-white rounded-lg bg-gradient-to-r from-purple-600 via-pink-500 to-sky-500 hover:scale-105"
-             className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-purple-800 text-white h-[35px] w-[100px] px-3 py-1.5 rounded-lg hover:shadow-md transition font-semibold"
+             className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-purple-800  hover:from-purple-800 hover:to-blue-500 text-white h-[35px] w-[100px] px-3 py-1.5 rounded-lg hover:shadow-md transition font-semibold cursor-pointer "
           >
             Logout
           </button>
@@ -128,16 +132,21 @@ function Home() {
             <Logout onConfirm={handleLogout} onCancel={() => setShowLogout(false)} />
           )}
 
-          <FaBell className="text-xl text-gray-600 hover:text-purple-600 cursor-pointer" onClick={()=>{navigate("/notifications")}} />
-
-          <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white ">
+          <FaBell className="text-xl text-gray-600 hover:text-blue-900 cursor-pointer" onClick={toggleNotifications} />
+          
+          {showNotification && (
+            <div className="absolute right-20 top-18 z-50 ">
+              <Notification onClose={toggleNotifications} />
+            </div>
+          )}
+          <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-800 hover:from-purple-800 hover:to-blue-500 text-white cursor-pointer ">
             <FaUser  onClick={()=>{navigate("/profile")}}/>
           </div>
         </div>
       </nav>
 
       {/* Posts Section */}
-      <div className="max-w-5xl mx-auto mt-8 space-y-6 px-4">
+      <div className="max-w-5xl mx-auto mt-8 space-y-6 px-4 ">
 
         {status === "loading" && (
           <p className="text-center text-lg text-gray-600 animate-pulse">

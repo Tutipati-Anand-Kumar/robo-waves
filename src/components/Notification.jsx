@@ -18,10 +18,40 @@ export default function Notification() {
       message: "Your blog post was approved.",
       time: "1 hour ago",
     },
+    {
+      id: 3,
+      title: "Blog Approved",
+      message: "Your blog post was approved.",
+      time: "1 hour ago",
+    },
+    {
+      id: 3,
+      title: "Blog Approved",
+      message: "Your blog post was approved.",
+      time: "1 hour ago",
+    },
+    {
+      id: 3,
+      title: "Blog Approved",
+      message: "Your blog post was approved.",
+      time: "1 hour ago",
+    },
+    {
+      id: 3,
+      title: "Blog Approved",
+      message: "Your blog post was approved.",
+      time: "1 hour ago",
+    },
+    {
+      id: 3,
+      title: "Blog Approved",
+      message: "Your blog post was approved.",
+      time: "1 hour ago",
+    },
   ];
 
   return (
-    <div className=" bg-gray-100 p-6 w-[400px] rounded-2xl m-[7px]" >
+    <div className=" bg-gray-100 p-6 w-[400px] h-[500px] rounded-2xl m-[7px] overflow-y-scroll" >
       <h1 className="text-2xl font-bold mb-4 ">Notifications</h1>
 
       <div className="bg-white rounded-xl shadow p-4 divide-y">

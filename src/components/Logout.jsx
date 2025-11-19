@@ -3,14 +3,14 @@ import { motion } from "framer-motion";
 
 const Logout = ({ onConfirm, onCancel }) => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+    <div className=" absolute right-140 top-70 flex items-center justify-center  backdrop-blur-sm z-50 ">
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.8, opacity: 0 }}
         className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-2xl p-8 w-[90%] max-w-[380px] text-center"
       >
-        <h2 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-purple-600 via-pink-500 to-sky-500 bg-clip-text text-transparent">
+        <h2 className="text-2xl font-semibold mb-4 text-gray-900">
           Are you sure you want to Logout?
         </h2>
         <div className="flex justify-center gap-4 mt-6">
@@ -18,8 +18,7 @@ const Logout = ({ onConfirm, onCancel }) => {
           <button
             onClick={onConfirm}
             className="px-6 py-2 font-medium text-white rounded-lg shadow-md 
-            bg-gradient-to-r from-purple-600 via-pink-500 to-sky-500 
-            hover:from-purple-700 hover:via-pink-600 hover:to-sky-600 
+            bg-red-600 hover:bg-red-500 
             transition-all duration-300"
           >
             Yes
@@ -29,8 +28,7 @@ const Logout = ({ onConfirm, onCancel }) => {
           <button
             onClick={onCancel}
             className="px-6 py-2 font-medium text-white rounded-lg shadow-md 
-            bg-gradient-to-r from-sky-500 via-pink-500 to-purple-600 
-            hover:from-sky-600 hover:via-pink-600 hover:to-purple-700 
+            bg-blue-800 hover:bg-blue-700 
             transition-all duration-300"
           >
             No
