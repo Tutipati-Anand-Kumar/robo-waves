@@ -301,15 +301,15 @@ import {
   commentArticle,
 } from "../redux/slices/articleSlice";
 import { toast } from "react-toastify";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Logout from "./Logout";
 import Notification from "./Notification";
-import UserCard from "./UserCard";
 
 function Home() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { articles, status, error } = useSelector((state) => state.articles);
+  const { user } = useSelector((state) => state.auth);
 
   const [showLogout, setShowLogout] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
@@ -344,6 +344,14 @@ function Home() {
   };
 
   // 🔥 COMMENT TOGGLE
+  // ✅ FIXED PROFILE IMAGE LOADING (after refresh)
+  const getUserImage = () => {
+    if (user?.user?.profilePhoto) {
+      return `data:image/jpeg;base64,${user?.user?.profilePhoto}`;
+    }
+    return null;
+  };
+
   const openCommentBox = (articleId) => {
     setShowCommentInput((prev) => ({
       ...prev,
@@ -362,7 +370,6 @@ function Home() {
   const handlePostComment = (articleId) => {
     const text = commentInputs[articleId];
     if (!text?.trim()) return;
-
     dispatch(commentArticle({ articleId, text }));
     setCommentInputs((prev) => ({ ...prev, [articleId]: "" }));
   };
@@ -377,6 +384,10 @@ function Home() {
   return (
     <div className="relative min-h-screen text-gray-800 font-sans bg-[url('./image1.png')] bg-cover bg-center">
       <div className={`${showLogout ? "blur-sm pointer-events-none" : ""}`}>
+  return (
+    <div className="relative min-h-screen text-gray-800 font-sans bg-[url('./image1.png')] bg-cover bg-center">
+      <div className={`${showLogout ? "blur-sm pointer-events-none" : ""}`}>
+
         {/* NAVBAR */}
         <nav className="flex items-center justify-between border-b bg-white/20 backdrop-blur-md px-6 py-3 shadow-sm sticky top-0 z-40">
           <div>
@@ -444,12 +455,24 @@ function Home() {
               onClick={toggleNotifications}
             />
 
+            {/* ✅ FIXED NAVBAR PROFILE PICTURE */}
             <div
               onClick={() => navigate("/profile")}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-800 text-white cursor-pointer"
+              className="w-10 h-10 rounded-full cursor-pointer overflow-hidden border-2 border-purple-600 shadow"
             >
-              <FaUser />
+              {getUserImage() ? (
+                <img
+                  src={getUserImage()}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-800 text-white">
+                  <FaUser />
+                </div>
+              )}
             </div>
+
           </div>
         </nav>
 
@@ -475,9 +498,15 @@ function Home() {
                   Posted by: {article.user?.email || "Unknown User"} •{" "}
                   {formatDate(article.createdAt)}
                 </div>
+          {articleList
+            .filter(article => !!article && !!article._id)
+            .map((article) => {
 
-                <h2 className="text-xl font-semibold">{article.title}</h2>
-                <p className="mt-2 text-gray-600">{article.content}</p>
+              const comments = Array.isArray(article.comments) ? article.comments : [];
+              const totalComments = comments.length;
+
+              const likeCount = typeof article.likeCount === "number" ? article.likeCount : 0;
+              const likedByCurrentUser = Boolean(article.likedByCurrentUser);
 
                 {/* ICONS */}
                 <div className="flex items-center justify-between mt-4 text-gray-600 text-sm">
@@ -569,6 +598,91 @@ function Home() {
               </div>
             );
           })}
+              const visibleCount = showCount[article._id] || 5;
+              const commentsToShow = comments.slice(0, visibleCount);
+
+              return (
+                <div
+                  key={article._id}
+                  className="flex flex-col border rounded-2xl p-5 bg-white shadow-md hover:shadow-xl transition-shadow"
+                >
+                  <div className="mb-3 text-sm text-gray-500">
+                    Posted by: {article.user?.email || "Unknown User"} • {formatDate(article.createdAt)}
+                  </div>
+
+                  <h2 className="text-xl font-semibold">{article.title}</h2>
+                  <p className="mt-2 text-gray-600">{article.content}</p>
+
+                  {/* LIKE + COMMENT ICONS */}
+                  <div className="flex items-center justify-between mt-4 text-gray-600 text-sm">
+
+                    <div
+                      className="flex items-center gap-2 cursor-pointer"
+                      onClick={() => openCommentBox(article._id)}
+                    >
+                      <FaCommentAlt className="text-purple-500 text-xl" />
+                      <span>{totalComments} Comments</span>
+                    </div>
+
+                    <div
+                      className="flex items-center gap-3 cursor-pointer text-xl"
+                      onClick={() => dispatch(likeArticle(article._id))}
+                    >
+                      <FaHeart
+                        className={`text-xl transition ${
+                          likedByCurrentUser ? "text-red-500" : "text-gray-400"
+                        }`}
+                      />
+                      <span>{likeCount}</span>
+                    </div>
+                  </div>
+
+                  {showCommentInput[article._id] && (
+                    <div className="flex gap-3 mt-4">
+                      <input
+                        type="text"
+                        placeholder="Add a comment..."
+                        className="flex-1 p-2 border rounded-lg bg-gray-100"
+                        value={commentInputs[article._id] || ""}
+                        onChange={(e) => handleCommentChange(article._id, e.target.value)}
+                      />
+                      <button
+                        onClick={() => handlePostComment(article._id)}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                      >
+                        Post
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="mt-4 space-y-3">
+                    {commentsToShow
+                      .filter(c => c && c.text)
+                      .map((c) => (
+                        <div key={c._id} className="p-3 bg-gray-100 rounded-lg border">
+                          <p>{c.text}</p>
+                          <p className="text-xs text-gray-500">{formatDate(c.createdAt)}</p>
+                        </div>
+                      ))}
+
+                    {visibleCount < totalComments && (
+                      <button
+                        onClick={() =>
+                          setShowCount((prev) => ({
+                            ...prev,
+                            [article._id]: (prev[article._id] || 5) + 5,
+                          }))
+                        }
+                        className="text-blue-600 mt-1"
+                      >
+                        Read More
+                      </button>
+                    )}
+                  </div>
+
+                </div>
+              );
+            })}
         </div>
       </div>
 
