@@ -350,17 +350,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 import {
   FaUser,
   FaHeart,
@@ -373,9 +362,10 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllArticles, likeArticle, commentArticle } from "../redux/slices/articleSlice";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logout from "./Logout";
 import Notification from "./Notification";
+import UserCard from "./UserCard";
 
 function Home() {
   const navigate = useNavigate();
@@ -435,6 +425,19 @@ function Home() {
   };
 
   const articleList = Array.isArray(articles) ? articles : [];
+
+
+
+
+const users = [
+  { _id: "1", name: "Alice", profession: "Developer" },
+  { _id: "2", name: "Bob", profession: "Designer" },
+];
+
+
+
+
+
 
   return (
     <div className="relative min-h-screen text-gray-800 font-sans bg-[url('./image1.png')] bg-cover bg-center">
@@ -560,7 +563,10 @@ function Home() {
                       <p>{c.text}</p>
                       <p className="text-xs text-gray-500">{formatDate(c.createdAt)}</p>
                     </div>
-                  ))}
+                   
+                  )  
+                  )}
+                  
 
                   {/* READ MORE */}
                   {visibleCount < totalComments && (
@@ -593,6 +599,21 @@ function Home() {
       {showLogout && (
         <Logout onConfirm={handleLogout} onCancel={() => setShowLogout(false)} />
       )}
+
+
+
+<div className="p-6">
+      <h1 className="text-2xl font-bold mb-4 ">Users</h1>
+      {users.map((user) => (
+        <UserCard key={user._id} user={user} />
+      ))}
+    </div>
+    <Link to="./usercard"></Link>
+
+
+
+
+
     </div>
   );
 }
