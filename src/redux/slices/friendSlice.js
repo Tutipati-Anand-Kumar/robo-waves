@@ -1,40 +1,76 @@
-// redux/slices/friendSlice.js
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../api/api";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../api/api';
+import { toast } from 'react-hot-toast';
 
-// Send friend request
-export const sendFriendRequest = createAsyncThunk(
-  "friends/sendRequest",
-  async (userId, { rejectWithValue }) => {
+export const sendFollowRequest = createAsyncThunk(
+  'friends/sendRequest',
+  'friends/sendRequest',
+  async (targetUserId, { rejectWithValue }) => {
     try {
-      const { data } = await api.post(`users/${userId}/friend-request`);
-      return { userId, ...data };
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to send request");
+      const response = await api.post('/follow/send-request', { targetUserId });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
     }
   }
 );
 
+export const acceptFollowRequest = createAsyncThunk(
+  'friends/acceptRequest',
+  async (followerId, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/follow/accept-request', { followerId });
+      return { followerId, ...response.data };
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const rejectFollowRequest = createAsyncThunk(
+  'friends/rejectRequest',
+  async (followerId, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/follow/reject-request', { followerId });
+      return { followerId, ...response.data };
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+const initialState = {
+  loading: false,
+  error: null,
+};
+
 const friendSlice = createSlice({
-  name: "friends",
-  initialState: {
-    requests: [],
-    status: "idle",
-    error: null,
-  },
+  name: 'friends',
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(sendFriendRequest.pending, (state) => {
-        state.status = "loading";
+      // Send
+      .addCase(sendFollowRequest.pending, (state) => {
+        state.loading = true;
       })
-      .addCase(sendFriendRequest.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.requests.push(action.payload.userId);
+      .addCase(sendFollowRequest.fulfilled, (state) => {
+        state.loading = false;
+        toast.success('Follow request sent');
       })
-      .addCase(sendFriendRequest.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload;
+      .addCase(sendFollowRequest.rejected, (state, action) => {
+        state.loading = false;
+        toast.error(action.payload.message || 'Failed to send request');
+      })
+      // Accept
+      .addCase(acceptFollowRequest.fulfilled, (state) => {
+        state.loading = false;
+        toast.success('Request accepted');
+      })
+      // Reject
+      .addCase(rejectFollowRequest.fulfilled, (state) => {
+        state.loading = false;
+        toast.success('Request rejected');
       });
   },
 });

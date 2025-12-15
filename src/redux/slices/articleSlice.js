@@ -1,161 +1,109 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import api from "../../api/api";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../api/api';
+import { toast } from 'react-hot-toast';
+
+export const getAllArticles = createAsyncThunk(
+  'articles/getAllArticles',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/articles');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const createArticle = createAsyncThunk(
+  'articles/createArticle',
+  async (articleData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/articles', articleData);
+      return response.data.article;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const likeArticle = createAsyncThunk(
+  'articles/likeArticle',
+  async (articleId, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/articles/${articleId}/like`);
+      return { articleId, ...response.data };
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const commentArticle = createAsyncThunk(
+  'articles/commentArticle',
+  async ({ articleId, text }, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/articles/${articleId}/comment`, { text });
+      return { articleId, comment: response.data.comment };
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 const initialState = {
   articles: [],
-  status: "idle",
+  status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
   error: null,
 };
 
-/* CREATE ARTICLE */
-export const createArticle = createAsyncThunk(
-  "articles/create",
-  async (payload, { rejectWithValue }) => {
-    try {
-      const { data } = await api.post("articles", payload);
-      return data;
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Failed to create article"
-      );
-    }
-  }
-);
-
-/* GET ALL ARTICLES */
-export const getAllArticles = createAsyncThunk(
-  "articles/getAll",
-  async (_, { rejectWithValue }) => {
-    try {
-      const { data } = await api.get("articles");
-      console.log(data)
-      return data;
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Failed to load articles"
-      );
-    }
-  }
-);
-
-
-  //  LIKE ARTICLE  
-
-export const likeArticle = createAsyncThunk(
-  "articles/like",
-  async (articleId, { rejectWithValue, getState }) => {
-    try {
-      const { data } = await api.put(`articles/${articleId}/like`);
-      console.log(data)
-  
-      const state = getState();
-      const currentUserId = state.auth?.user?.user?._id;
-
-      return {
-        articleId,
-        updatedArticle: data.article,
-        currentUserId,
-      };
-
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Failed to like article"
-      );
-    }
-  }
-);
-
-/* COMMENT ON ARTICLE */
-export const commentArticle = createAsyncThunk(
-  "articles/comment",
-  async ({ articleId, text }, { rejectWithValue }) => {
-    try {
-      const { data } = await api.post(`articles/${articleId}/comment`, { text });
-      return { articleId, comment: data.comment };
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Failed to post comment"
-      );
-    }
-  }
-);
-
-/* SLICE */
 const articleSlice = createSlice({
-  name: "articles",
+  name: 'articles',
   initialState,
   reducers: {},
-
   extraReducers: (builder) => {
     builder
-      /* CREATE */
-      .addCase(createArticle.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(createArticle.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.articles.push(action.payload.article);
-      })
-      .addCase(createArticle.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload;
-      })
-
-      /* GET ALL */
+      // GetAllArticles
       .addCase(getAllArticles.pending, (state) => {
-        state.status = "loading";
+        state.status = 'loading';
       })
       .addCase(getAllArticles.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status = 'succeeded';
         state.articles = action.payload;
       })
       .addCase(getAllArticles.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload;
+        state.status = 'failed';
+        state.error = action.payload.message;
       })
-
-      /* LIKE ARTICLE  */
-      .addCase(likeArticle.pending, (state) => {
-        state.status = "loading";
-        state.error = null;
+      // Create
+      .addCase(createArticle.pending, (state) => {
+        state.status = 'loading';
       })
-
+      .addCase(createArticle.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.articles.unshift(action.payload);
+        toast.success('Article published!');
+      })
+      .addCase(createArticle.rejected, (state, action) => {
+        state.status = 'failed';
+        toast.error(action.payload.message || 'Failed to post article');
+      })
+      // Like
       .addCase(likeArticle.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        const { articleId, updatedArticle, currentUserId } = action.payload;
-        const article = state.articles.find((a) => a._id === articleId);
-        if (article) {
-          // Update article data from backend
-          article.likeCount = updatedArticle.likeCount;
-          article.likedBy = updatedArticle.likedBy;
-          article.likedByCurrentUser = updatedArticle.likedBy.includes(currentUserId);
+        const { articleId, article } = action.payload;
+        const existingArticle = state.articles.find(a => a._id === articleId);
+        if (existingArticle) {
+          existingArticle.likeCount = article.likeCount;
+          existingArticle.likedBy = article.likedBy;
         }
       })
-
-      .addCase(likeArticle.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload;
-      })
-
-      /* COMMENT */
-      .addCase(commentArticle.pending, (state) => {
-        state.status = "loading";
-        state.error = null;
-      })
-
+      // Comment
       .addCase(commentArticle.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        const article = state.articles.find(
-          (a) => a._id === action.payload.articleId
-        );
-        if (article) {
-          article.comments.push(action.payload.comment);
+        const { articleId, comment } = action.payload;
+        const existingArticle = state.articles.find(a => a._id === articleId);
+        if (existingArticle) {
+          existingArticle.comments.push(comment);
         }
-      })
-
-      .addCase(commentArticle.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload;
+        toast.success('Comment added!');
       });
   },
 });

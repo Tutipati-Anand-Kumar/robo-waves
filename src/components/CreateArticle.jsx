@@ -33,24 +33,24 @@ const CreateArticle = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[url('./image1.png')] bg-cover bg-center p-6">
-      
-      {/* White clean card */}
-      <div className="bg-white shadow-2xl rounded-xl p-8 w-full max-w-lg border border-gray-200">
+    <div className="min-h-screen flex items-center justify-center p-6">
 
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">
+      {/* Glassy card */}
+      <div className="bg-white/30 backdrop-blur-md shadow-2xl rounded-2xl p-8 w-full max-w-lg border border-white/40">
+
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-sky-500 bg-clip-text text-transparent text-center mb-6 max-[650px]:text-xl">
           Create New Article
         </h2>
 
         {error && (
-          <p className="bg-red-500 text-white p-2 rounded mb-4">{error}</p>
+          <p className="bg-red-500/80 text-white p-2 rounded mb-4 text-center backdrop-blur-sm">{error}</p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          
+
           {/* Title */}
           <div>
-            <label className="text-gray-700 block mb-2 font-medium">Title</label>
+            <label className="text-gray-800 block mb-2 font-medium">Title</label>
             <input
               type="text"
               name="title"
@@ -58,13 +58,13 @@ const CreateArticle = () => {
               value={form.title}
               onChange={handleChange}
               required
-              className="w-full p-3 rounded-lg bg-gray-100 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="w-full p-3 rounded-lg bg-white/50 border border-white/40 text-gray-900 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-inner"
             />
           </div>
 
           {/* Content */}
           <div>
-            <label className="text-gray-700 block mb-2 font-medium">Content</label>
+            <label className="text-gray-800 block mb-2 font-medium">Content</label>
             <textarea
               name="content"
               rows="5"
@@ -72,7 +72,7 @@ const CreateArticle = () => {
               value={form.content}
               onChange={handleChange}
               required
-              className="w-full p-3 rounded-lg bg-gray-100 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="w-full p-3 rounded-lg bg-white/50 border border-white/40 text-gray-900 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-inner"
             ></textarea>
           </div>
 
@@ -80,7 +80,7 @@ const CreateArticle = () => {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full py-3 bg-teal-500 hover:bg-teal-400 text-white font-semibold rounded-lg transition"
+            className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-purple-600 hover:to-blue-500 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl max-[650px]:py-2 max-[650px]:text-md"
           >
             {status === "loading" ? "Publishing..." : "Publish Article"}
           </button>
