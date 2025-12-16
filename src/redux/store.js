@@ -9,7 +9,8 @@ const store = configureStore({
   reducer: {
     auth: authReducer,
     articles: articleReducer,
-    friends: friendReducer,
+    notifications: notificationReducer, 
+    follow: followReducer,   
   },
 });
 

@@ -288,11 +288,18 @@ const Profile = () => {
               >
                 Save Changes
               </button>
-            </div>
           </div>
-        </div>
+      </div>
+      </div>
+      {showLogout && (
+        <Logout
+          onConfirm={handleLogout}
+          onCancel={() => setShowLogout(false)}
+        />
       )}
+      </div>
     </div>
+    
   );
 };
 export default Profile;

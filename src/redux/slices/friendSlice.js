@@ -75,4 +75,12 @@ const friendSlice = createSlice({
   },
 });
 
-export default friendSlice.reducer;
+/* EXPORTS */
+
+export const {
+  setInitialRequests,
+  addPendingRequest,
+  removePendingRequest,
+} = followSlice.actions;
+
+export default followSlice.reducer;

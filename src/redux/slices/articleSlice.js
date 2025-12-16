@@ -108,4 +108,9 @@ const articleSlice = createSlice({
   },
 });
 
+export const {
+  likeArticleRealtime,
+  addCommentRealtime,
+  addNewPost,resetArticles,
+} = articleSlice.actions;
 export default articleSlice.reducer;

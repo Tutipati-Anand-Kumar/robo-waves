@@ -1,9 +1,13 @@
 import React from "react";
+import Navbar from './Navbar';
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fff7fb] via-[#f6faff] to-[#eef7ff] flex items-center justify-center px-6 py-16">
-      <div className="max-w-4xl bg-white/40 backdrop-blur-xl shadow-xl rounded-2xl p-10 border border-white/30">
+    <div className="relative min-h-screen text-gray-800 font-sans 
+      bg-[url('./image1.png')] bg-cover bg-center bg-fixed flex flex-col">
+      <Navbar/>
+      <div className="flex items-center justify-center">
+        <div className="max-w-4xl bg-white/40 backdrop-blur-xl shadow-xl rounded-2xl p-10 border border-white/30 mt-15 mb-15">
 
         {/* Heading */}
         <h1 className="text-4xl font-semibold text-center bg-gradient-to-r from-purple-600 via-pink-500 to-sky-500 bg-clip-text text-transparent mb-6">
@@ -52,6 +56,7 @@ const About = () => {
             Your words matter. Your story deserves to be heard.
           </span>
         </p>
+      </div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createArticle } from "../redux/slices/articleSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Navbar from "./Navbar";
 
 const CreateArticle = () => {
   const dispatch = useDispatch();
@@ -85,6 +86,7 @@ const CreateArticle = () => {
             {status === "loading" ? "Publishing..." : "Publish Article"}
           </button>
         </form>
+      </div>
       </div>
     </div>
   );

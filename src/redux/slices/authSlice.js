@@ -3,6 +3,7 @@ import api from '../../api/api';
 import { toast } from 'react-hot-toast';
 import { acceptFollowRequest, rejectFollowRequest } from './friendSlice';
 
+/* REGISTER USER */
 export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
@@ -28,6 +29,7 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+/* LOGIN USER */
 export const loginUser = createAsyncThunk(
   'auth/login',
   async (userData, { rejectWithValue }) => {
@@ -138,6 +140,21 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         toast.success('Registration successful!');
       })
+
+      // .addCase(loginUser.fulfilled, (state, action) => {
+      //   state.status = "succeeded";
+      //   state.user = action.payload.user;
+      //   state.profilePhoto = action.payload.user.profilePhoto;
+      //   state.isAuthenticated = true;
+      // })
+      .addCase(loginUser.fulfilled, (state, action) => {
+  state.status = "succeeded";
+  state.user = action.payload.user;
+  state.profilePhoto = action.payload.user.profilePhoto;
+  state.isAuthenticated = true;
+})
+
+
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload.message;

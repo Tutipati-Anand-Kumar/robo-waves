@@ -297,7 +297,7 @@ const Register = () => {
             <div className="flex gap-6 mt-6">
               <button
                 type="button"
-                className="bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-2 rounded-md shadow-md transition-all duration-300"
+                className="bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-2 rounded-md shadow-md transition-all duration-300 cursor-pointer"
                 onClick={() => {
                   const cropper = cropperRef.current;
                   if (cropper) {
@@ -326,7 +326,7 @@ const Register = () => {
 
               <button
                 type="button"
-                className="bg-red-600 hover:bg-red-700 text-white text-sm px-6 py-2 rounded-md shadow-md transition-all duration-300"
+                className="bg-red-600 hover:bg-red-700 text-white text-sm px-6 py-2 rounded-md shadow-md transition-all duration-300 cursor-pointer"
                 onClick={() => setShowCropper(false)}
               >
                 Cancel

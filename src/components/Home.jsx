@@ -13,9 +13,18 @@ function Home() {
 
   const toggleNotifications = () => setShowNotification(!showNotification);
 
-  useEffect(() => {
-    dispatch(getAllArticles());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(getAllArticles());
+  // }, [dispatch]);
+
+  const isAuthenticated = useSelector(
+  (state) => state.auth.isAuthenticated
+);
+
+if (!isAuthenticated) return null;
+
+
+  const { profilePhoto } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (error) toast.error(error);
