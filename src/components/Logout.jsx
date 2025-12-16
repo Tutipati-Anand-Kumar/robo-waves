@@ -19,7 +19,7 @@ const Logout = ({ onConfirm, onCancel }) => {
             onClick={onConfirm}
             className="px-6 py-2 font-medium text-white rounded-lg shadow-md 
             bg-red-600 hover:bg-red-500 
-            transition-all duration-300"
+            transition-all duration-300 cursor-pointer"
           >
             Yes
           </button>
@@ -29,7 +29,7 @@ const Logout = ({ onConfirm, onCancel }) => {
             onClick={onCancel}
             className="px-6 py-2 font-medium text-white rounded-lg shadow-md 
             bg-blue-800 hover:bg-blue-700 
-            transition-all duration-300"
+            transition-all duration-300 cursor-pointer"
           >
             No
           </button>

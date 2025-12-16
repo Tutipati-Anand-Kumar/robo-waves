@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createArticle } from "../redux/slices/articleSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Navbar from "./Navbar";
 
 const CreateArticle = () => {
   const dispatch = useDispatch();
@@ -33,12 +34,13 @@ const CreateArticle = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[url('./image1.png')] bg-cover bg-center p-6">
-      
+    <div className="min-h-screen  bg-[url('./image1.png')] bg-cover bg-center flex-col">
+      <Navbar/>
       {/* White clean card */}
-      <div className="bg-white shadow-2xl rounded-xl p-8 w-full max-w-lg border border-gray-200">
+      <div className="w-full h-160 flex items-center justify-center ">
+        <div className="bg-white shadow-2xl rounded-xl p-8 w-full max-w-lg border border-gray-200">
 
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">
+        <h2 className="text-3xl font-bold text-gray-800 text-center mb-6 ">
           Create New Article
         </h2>
 
@@ -80,11 +82,12 @@ const CreateArticle = () => {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full py-3 bg-teal-500 hover:bg-teal-400 text-white font-semibold rounded-lg transition"
+            className="w-full py-3 bg-teal-500 hover:bg-teal-400 text-white font-semibold rounded-lg transition cursor-pointer"
           >
             {status === "loading" ? "Publishing..." : "Publish Article"}
           </button>
         </form>
+      </div>
       </div>
     </div>
   );

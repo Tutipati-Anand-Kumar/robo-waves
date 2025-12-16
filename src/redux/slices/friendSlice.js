@@ -1,42 +1,114 @@
-// redux/slices/friendSlice.js
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../api/api";
+// src/redux/slices/followSlice.js
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import {
+  acceptFollowRequestAPI,
+  sendFollowRequestAPI,
+  rejectFollowRequestAPI,
+} from "./followServices";
 
-// Send friend request
-export const sendFriendRequest = createAsyncThunk(
-  "friends/sendRequest",
-  async (userId, { rejectWithValue }) => {
+/* THUNKS */
+
+export const sendFollowRequest = createAsyncThunk(
+  "follow/sendRequest",
+  async ({ targetUsername }, { rejectWithValue }) => {
     try {
-      const { data } = await api.post(`users/${userId}/friend-request`);
-      return { userId, ...data };
+      return await sendFollowRequestAPI(targetUsername);
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to send request");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to send request"
+      );
     }
   }
 );
 
-const friendSlice = createSlice({
-  name: "friends",
+export const acceptFollowRequest = createAsyncThunk(
+  "follow/acceptRequest",
+  async ({ followerId }, { rejectWithValue }) => {
+    try {
+      return await acceptFollowRequestAPI(followerId);
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Accept request failed"
+      );
+    }
+  }
+);
+
+export const rejectFollowRequest = createAsyncThunk(
+  "follow/rejectRequest",
+  async ({ followerId }, { rejectWithValue }) => {
+    try {
+      await rejectFollowRequestAPI(followerId);
+      return followerId;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Reject failed"
+      );
+    }
+  }
+);
+
+/* SLICE */
+
+const followSlice = createSlice({
+  name: "follow",
   initialState: {
     requests: [],
     status: "idle",
     error: null,
   },
-  reducers: {},
+
+  // ✅ ONE reducers object only
+  reducers: {
+
+    setInitialRequests: (state, action) => {
+      state.requests = action.payload;
+    },
+    // 🟢 socket: follow request received
+    addPendingRequest: (state, action) => {
+      state.requests.unshift(action.payload);
+    },
+
+    // 🟢 socket: request accepted / rejected
+    removePendingRequest: (state, action) => {
+      state.requests = state.requests.filter(
+        (req) => req._id !== action.payload
+      );
+    },
+  },
+
   extraReducers: (builder) => {
     builder
-      .addCase(sendFriendRequest.pending, (state) => {
+      .addCase(sendFollowRequest.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(sendFriendRequest.fulfilled, (state, action) => {
+      .addCase(sendFollowRequest.fulfilled, (state) => {
         state.status = "succeeded";
-        state.requests.push(action.payload.userId);
       })
-      .addCase(sendFriendRequest.rejected, (state, action) => {
+      .addCase(sendFollowRequest.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
+      })
+      .addCase(acceptFollowRequest.fulfilled, (state) => {
+        state.status = "succeeded";
+        const followerId = action.meta.arg.followerId;
+
+        state.requests = state.requests.filter(
+            (req) => req._id !== followerId
+          );
+      })
+      .addCase(rejectFollowRequest.fulfilled, (state) => {
+        state.status = "succeeded";
       });
   },
 });
 
-export default friendSlice.reducer;
+/* EXPORTS */
+
+export const {
+  setInitialRequests,
+  addPendingRequest,
+  removePendingRequest,
+} = followSlice.actions;
+
+export default followSlice.reducer;

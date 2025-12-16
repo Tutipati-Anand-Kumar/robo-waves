@@ -1,185 +1,214 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { FaUser } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import Logout from "./Logout";
+import Navbar from "./Navbar";
+import toast from "react-hot-toast";
+import { acceptFollowRequest, sendFollowRequest , rejectFollowRequest } from "../redux/slices/friendSlice";
+
+
 
 const Profile = () => {
-  const [user, setUser] = useState({
-    name: "Jhansi",
-    profession: "Software Developer",
-    articles: 75,
-    following: 140,
-    followers: "5M",
-    profile: "",
-  });
+  const { user } = useSelector((state) => state.auth);   // full backend user object
+  console.log(user)
+  const profilePhoto = useSelector((state) => state.auth.profilePhoto);
 
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const [tempUser, setTempUser] = useState(user);
+  const followersCount = user?.followers?.length || 0;
+  const followingCount = user?.following?.length || 0;
+  // const pendingRequests = user?.pendingRequests || [];
+  const pendingRequests = useSelector(
+  (state) => state.follow.requests
+);
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
+  const [usernameInput, setUsernameInput] = useState("");
+
+  const navigate = useNavigate();
+
+  const [showLogout, setShowLogout] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    localStorage.removeItem("authtoken");
+    navigate("/login");
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageURL = URL.createObjectURL(file);
-      setTempUser({ ...tempUser, profile: imageURL });
-    }
-  };
+/*  SEND REQUEST */
+const handleSendRequest = () => {
+  if (!usernameInput.trim()) {
+    toast.error("Enter a username");
+    return;
+  }
 
-  const saveChanges = () => {
-    setUser(tempUser);
-    setOpenEdit(false);
-  };
+  dispatch(sendFollowRequest({ targetUsername: usernameInput }))
+    .unwrap()
+    .then(() => {
+      toast.success(`Request sent to @${usernameInput}`);
+      setUsernameInput("");
+    })
+    .catch((err) => {
+      toast.error(err || "Failed to send request");
+    });
+};
+
+/*  ACCEPT REQUEST */
+const handleAccept = (followerId) => {
+  dispatch(acceptFollowRequest({ followerId }))
+    .unwrap()
+    .then(() => {
+      toast.success("Follow request accepted");
+    })
+    .catch((err) => {
+      toast.error(err || "Accept failed");
+    });
+};
+
+/*  REJECT REQUEST */
+const handleReject = (followerId) => {
+  dispatch(rejectFollowRequest({ followerId }))
+    .unwrap()
+    .then(() => {
+      toast.success("Follow request rejected");
+    })
+    .catch((err) => {
+      toast.error(err || "Reject failed");
+    });
+};
+
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center p-6">
-      <div className="bg-white shadow-xl rounded-2xl w-full max-w-4xl p-10 ">
+    <div className="relative min-h-screen text-gray-800 font-sans 
+      bg-[url('./image1.png')] bg-cover bg-center bg-fixed flex  flex-col">
+      <Navbar/>
+      <div className="w-full h-160 flex items-center justify-center ">
+        <div className={`${showLogout ? "blur-sm pointer-events-none" : ""}`}>
+        <div className="bg-white shadow-xl rounded-2xl w-full max-w-4xl p-10">
 
-        {/* TOP SECTION */}
-        <div className="flex items-center gap-6">
-          {/* Profile Image */}
-          <div className="w-24 h-24 rounded-full bg-purple-200 flex items-center justify-center overflow-hidden">
-            {user.profile ? (
-              <img
-                src={user.profile}
-                alt="profile"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="purple"
-                className="w-16 h-16"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 4.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 22.25a8.25 8.25 0 1115 0H4.5z"
-                />
-              </svg>
-            )}
-          </div>
+          {/* TOP SECTION */}
+          <div className="flex items-center gap-8">
 
-          {/* User Info */}
-          <div>
-            <h2 className="text-2xl font-bold">{user.name}</h2>
-            <p className="text-gray-600">{user.profession}</p>
-          </div>
-
-          {/* Stats */}
-          <div className="ml-auto flex gap-10 text-center">
-            <div>
-              <p className="text-xl font-bold">{user.articles}+</p>
-              <p className="text-gray-600 text-sm">Articles</p>
-            </div>
-            <div>
-              <p className="text-xl font-bold">{user.following}</p>
-              <p className="text-gray-600 text-sm">Following</p>
-            </div>
-            <div>
-              <p className="text-xl font-bold">{user.followers}</p>
-              <p className="text-gray-600 text-sm">Followers</p>
-            </div>
-          </div>
-        </div>
-
-        {/* BUTTONS */}
-        <div className="flex gap-4 mt-6">
-          <button
-            onClick={handleFollow}
-            className={`px-6 py-2 rounded-lg font-semibold text-white shadow 
-              ${isFollowing ? "bg-red-500 hover:bg-red-600" : "bg-purple-600 hover:bg-purple-700"}`}
-          >
-            {isFollowing ? "Unfollow" : "Follow"}
-          </button>
-
-          <button
-            onClick={() => setOpenEdit(true)}
-            className="px-6 py-2 rounded-lg border border-gray-400 hover:bg-gray-200 transition"
-          >
-            Edit Profile
-          </button>
-        </div>
-
-        {/* Content Section */}
-        <textarea className="mt-10 p-6 border rounded-xl bg-red-50 h-40 w-[100%]">
-          <p className="text-gray-600 "></p>
-        </textarea>
-        <div className="gap-[560px] flex">
-          <button className="border rounded-xl p-2 m-1 bg-purple-600 text-white ">Apply the changes</button> 
-        <button className="border rounded-xl p-2 m-1 bg-purple-600 text-white w-[80px]">Cancel</button>
-        </div>
-      </div>
-
-      {/* EDIT PROFILE MODAL */}
-      {openEdit && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-2xl w-[90%] max-w-md shadow-xl">
-            <h3 className="text-xl font-semibold mb-4">Edit Profile</h3>
-
-            <input
-              type="text"
-              className="w-full border px-3 py-2 rounded mb-3"
-              placeholder="Name"
-              value={tempUser.name}
-              onChange={(e) =>
-                setTempUser({ ...tempUser, name: e.target.value })
-              }
-            />
-
-            <input
-              type="text"
-              className="w-full border px-3 py-2 rounded mb-3"
-              placeholder="Profession"
-              value={tempUser.profession}
-              onChange={(e) =>
-                setTempUser({ ...tempUser, profession: e.target.value })
-              }
-            />
-
-            {/* Image Upload */}
-            <label className="block mb-3">
-              <span className="text-gray-700 border rounded p-0.5 bg-white hover:bg-purple-100"> Change Profile:</span>
-              <input
-                type="file"
-                accept="image/*"
-                className="mt-2 w-full"
-                onChange={handleImageUpload}
-              />
-            </label>
-
-            {/* Preview */}
-            {tempUser.profile && (
-              <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border">
+            {/* PROFILE IMAGE */}
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center">
+              {profilePhoto ? (
                 <img
-                  src={tempUser.profile}
+                  src={`data:image/jpeg;base64,${profilePhoto}`}
+                  alt="Profile"
                   className="w-full h-full object-cover"
                 />
-              </div>
-            )}
- 
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setOpenEdit(false)}
-                className="px-4 py-2 rounded border"
-              >
-                Cancel
-              </button>
+              ) : (
+                <FaUser className="text-gray-600 text-4xl" />
+              )}
+            </div>
 
-              <button
-                onClick={saveChanges}
-                className="px-4 py-2 rounded bg-purple-600 text-white"
-              >
-                Save
-              </button>
+            {/* USER INFO */}
+            <div>
+              <h2 className="text-2xl font-bold">{user?.username}</h2>
+              <p className="text-gray-600">{user?.email}</p>
+            </div>
+
+            {/* FOLLOW STATS */}
+            <div className="ml-auto flex gap-12 text-center">
+              <div>
+                <p className="text-xl font-bold">{followingCount}</p>
+                <p className="text-gray-600 text-sm">Following</p>
+              </div>
+              <div>
+                <p className="text-xl font-bold">{followersCount}</p>
+                <p className="text-gray-600 text-sm">Followers</p>
+              </div>
             </div>
           </div>
-        </div>
+          {/* Add Friends  */}
+          <div className="my-8">
+            <h3 className="text-xl font-semibold mb-3">Add Friends + </h3>
+            <div className="flex space-between gap-3">
+              <input
+              className="border p-2 rounded-xl w-64 h-9"
+              placeholder="Enter username..."
+              value={usernameInput}
+              onChange={(e) => setUsernameInput(e.target.value)}
+            />
+
+            <button
+              onClick={()=>{handleSendRequest()}}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-800 hover:from-purple-800  hover:to-blue-500 text-white cursor-pointer"
+            >
+              Send Request
+            </button>
+            </div>
+          </div>
+
+          {/* PENDING REQUESTS SECTION */}
+          <div className="m-2">
+            <h3 className="text-xl font-semibold mb-1">Pending Requests</h3>
+
+            {pendingRequests.length === 0 ? (
+              <p className="text-gray-500">No pending requests</p>
+            ) : (
+              <div className="space-y-2">
+                {pendingRequests.map((req) => (
+                  <div
+                    key={req._id}
+                    className="p-2 bg-gray-100 rounded-lg shadow-sm flex justify-between flex-row" 
+                  >
+                    <div className="flex flex-row items-center justify-center gap-3 mr-1">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center">
+                      {profilePhoto ? (
+                        <img
+                          src={`data:image/jpeg;base64,${req.profilePhoto}`}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <FaUser className="text-gray-600 text-4xl" />
+                      )}
+                    </div>
+                    <div className="flex justify-center flex-col">
+                      <span>{req.username || "Unknown user"}</span>
+            
+                      {/* <span>{req.email || "Unknown user"}</span> */}
+                    </div>
+                    </div>
+
+                    {/* Accept / Reject buttons (OPTIONAL) */}
+                    <div className="flex gap-2">
+                      <button 
+                      onClick={() => handleAccept(req._id)} 
+                      className=" px-4 py-1 bg-green-500 text-white rounded-lg cursor-pointer">
+                        Accept
+                      </button>
+                      <button 
+                        onClick={() => handleReject(req._id)}
+                        className="px-4 py-1 bg-red-500 text-white rounded-lg cursor-pointer">
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center justify-end mt-5">
+            <button
+                onClick={() => setShowLogout(true)}
+                className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white h-[35px] w-[100px] px-3 py-1.5 rounded-lg cursor-pointer"
+              >
+                Logout
+              </button>
+          </div>
+      </div>
+      </div>
+      {showLogout && (
+        <Logout
+          onConfirm={handleLogout}
+          onCancel={() => setShowLogout(false)}
+        />
       )}
+      </div>
     </div>
+    
   );
 };
 

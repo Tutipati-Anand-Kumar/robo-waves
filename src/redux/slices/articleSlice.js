@@ -49,7 +49,7 @@ export const likeArticle = createAsyncThunk(
       console.log(data)
   
       const state = getState();
-      const currentUserId = state.auth?.user?.user?._id;
+      const currentUserId = state.auth?.user?._id;
 
       return {
         articleId,
@@ -84,7 +84,39 @@ export const commentArticle = createAsyncThunk(
 const articleSlice = createSlice({
   name: "articles",
   initialState,
-  reducers: {},
+  reducers: {
+    // ❤️ LIKE via socket
+    likeArticleRealtime: (state, action) => {
+      const { articleId, likedBy } = action.payload;
+      const article = state.articles.find(a => a._id === articleId);
+      if (article) {
+        article.likeCount = likedBy.length;
+        article.likedBy = likedBy;
+      }
+    },
+
+    // 💬 COMMENT via socket
+    addCommentRealtime: (state, action) => {
+      const { articleId, comment } = action.payload;
+      const article = state.articles.find(a => a._id === articleId);
+      if (article) {
+        article.comments.unshift(comment);
+      }
+    },
+
+    // 📝 NEW POST via socket
+    addNewPost: (state, action) => {
+      state.articles.unshift(action.payload);
+    },
+
+    // 🧹 RESET ON LOGOUT (⭐ IMPORTANT)
+  resetArticles: (state) => {
+    state.articles = [];
+    state.status = "idle";
+    state.error = null;
+  },
+  
+  },
 
   extraReducers: (builder) => {
     builder
@@ -144,14 +176,14 @@ const articleSlice = createSlice({
       })
 
       .addCase(commentArticle.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        const article = state.articles.find(
-          (a) => a._id === action.payload.articleId
-        );
-        if (article) {
-          article.comments.push(action.payload.comment);
-        }
-      })
+  const { articleId, comment } = action.payload;
+
+  const article = state.articles.find(a => a._id === articleId);
+  if (article) {
+    article.comments = [comment, ...article.comments];
+  }
+})
+
 
       .addCase(commentArticle.rejected, (state, action) => {
         state.status = "failed";
@@ -160,4 +192,9 @@ const articleSlice = createSlice({
   },
 });
 
+export const {
+  likeArticleRealtime,
+  addCommentRealtime,
+  addNewPost,resetArticles,
+} = articleSlice.actions;
 export default articleSlice.reducer;

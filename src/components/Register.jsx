@@ -207,7 +207,7 @@ const Register = () => {
 
               <button
                 type="submit"
-                className="w-full py-2 bg-gradient-to-r from-blue-500 to-purple-800 hover:from-purple-800 hover:to-blue-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300"
+                className="w-full py-2 bg-gradient-to-r from-blue-500 to-purple-800 hover:from-purple-800 hover:to-blue-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300 cursor-pointer"
               >
                 Register
               </button>
@@ -297,7 +297,7 @@ const Register = () => {
             <div className="flex gap-6 mt-6">
               <button
                 type="button"
-                className="bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-2 rounded-md shadow-md transition-all duration-300"
+                className="bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-2 rounded-md shadow-md transition-all duration-300 cursor-pointer"
                 onClick={() => {
                   const cropper = cropperRef.current;
                   if (cropper) {
@@ -326,7 +326,7 @@ const Register = () => {
 
               <button
                 type="button"
-                className="bg-red-600 hover:bg-red-700 text-white text-sm px-6 py-2 rounded-md shadow-md transition-all duration-300"
+                className="bg-red-600 hover:bg-red-700 text-white text-sm px-6 py-2 rounded-md shadow-md transition-all duration-300 cursor-pointer"
                 onClick={() => setShowCropper(false)}
               >
                 Cancel
