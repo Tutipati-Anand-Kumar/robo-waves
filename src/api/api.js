@@ -1,11 +1,13 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://robo-zv8u.onrender.com/api",
+  baseURL: import.meta.env.MODE === "development"
+    ? "http://localhost:5000/api"
+    : "https://blogger-backend-c1ax.onrender.com/api", // 
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("authtoken");
+  const token = sessionStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

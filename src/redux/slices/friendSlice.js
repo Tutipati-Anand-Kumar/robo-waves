@@ -1,104 +1,76 @@
-// src/redux/slices/followSlice.js
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {
-  acceptFollowRequestAPI,
-  sendFollowRequestAPI,
-  rejectFollowRequestAPI,
-} from "./followServices";
-
-/* THUNKS */
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../api/api';
+import { toast } from 'react-hot-toast';
 
 export const sendFollowRequest = createAsyncThunk(
-  "follow/sendRequest",
-  async ({ targetUsername }, { rejectWithValue }) => {
+  'friends/sendRequest',
+  'friends/sendRequest',
+  async (targetUserId, { rejectWithValue }) => {
     try {
-      return await sendFollowRequestAPI(targetUsername);
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Failed to send request"
-      );
+      const response = await api.post('/follow/send-request', { targetUserId });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
     }
   }
 );
 
 export const acceptFollowRequest = createAsyncThunk(
-  "follow/acceptRequest",
-  async ({ followerId }, { rejectWithValue }) => {
+  'friends/acceptRequest',
+  async (followerId, { rejectWithValue }) => {
     try {
-      return await acceptFollowRequestAPI(followerId);
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Accept request failed"
-      );
+      const response = await api.post('/follow/accept-request', { followerId });
+      return { followerId, ...response.data };
+    } catch (error) {
+      return rejectWithValue(error.response.data);
     }
   }
 );
 
 export const rejectFollowRequest = createAsyncThunk(
-  "follow/rejectRequest",
-  async ({ followerId }, { rejectWithValue }) => {
+  'friends/rejectRequest',
+  async (followerId, { rejectWithValue }) => {
     try {
-      await rejectFollowRequestAPI(followerId);
-      return followerId;
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Reject failed"
-      );
+      const response = await api.post('/follow/reject-request', { followerId });
+      return { followerId, ...response.data };
+    } catch (error) {
+      return rejectWithValue(error.response.data);
     }
   }
 );
 
-/* SLICE */
+const initialState = {
+  loading: false,
+  error: null,
+};
 
-const followSlice = createSlice({
-  name: "follow",
-  initialState: {
-    requests: [],
-    status: "idle",
-    error: null,
-  },
-
-  // ✅ ONE reducers object only
-  reducers: {
-
-    setInitialRequests: (state, action) => {
-      state.requests = action.payload;
-    },
-    // 🟢 socket: follow request received
-    addPendingRequest: (state, action) => {
-      state.requests.unshift(action.payload);
-    },
-
-    // 🟢 socket: request accepted / rejected
-    removePendingRequest: (state, action) => {
-      state.requests = state.requests.filter(
-        (req) => req._id !== action.payload
-      );
-    },
-  },
-
+const friendSlice = createSlice({
+  name: 'friends',
+  initialState,
+  reducers: {},
   extraReducers: (builder) => {
     builder
+      // Send
       .addCase(sendFollowRequest.pending, (state) => {
-        state.status = "loading";
+        state.loading = true;
       })
       .addCase(sendFollowRequest.fulfilled, (state) => {
-        state.status = "succeeded";
+        state.loading = false;
+        toast.success('Follow request sent');
       })
       .addCase(sendFollowRequest.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload;
+        state.loading = false;
+        toast.error(action.payload.message || 'Failed to send request');
       })
+      // Accept
       .addCase(acceptFollowRequest.fulfilled, (state) => {
-        state.status = "succeeded";
-        const followerId = action.meta.arg.followerId;
-
-        state.requests = state.requests.filter(
-            (req) => req._id !== followerId
-          );
+        state.loading = false;
+        toast.success('Request accepted');
       })
+      // Reject
       .addCase(rejectFollowRequest.fulfilled, (state) => {
-        state.status = "succeeded";
+        state.loading = false;
+        toast.success('Request rejected');
       });
   },
 });

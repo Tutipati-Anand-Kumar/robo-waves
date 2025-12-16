@@ -1,56 +1,37 @@
-import React, { useEffect, useRef } from "react";
-import { RouterProvider } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import routes from "./routes/routes";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import PrivateRoute from './routes/PrivateRoute';
+import Login from './components/Login';
+import Register from './components/Register';
+import Home from './components/Home';
+import CreateArticle from './components/CreateArticle';
+import Profile from './components/Profile';
+import Notifications from './components/Notification';
 
-import { useDispatch, useSelector } from "react-redux";
-import { connectSocket, disconnectSocket } from "./sockets/socket";
-import { registerSocketListeners } from "./sockets/socketListeners";
-import { getAllArticles } from "./redux/slices/articleSlice";
-import { setInitialRequests } from "./redux/slices/friendSlice";
-
-const App = () => {
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.user);
-
-  // 🔐 prevents duplicate socket listeners
-  const listenersRegistered = useRef(false);
-
-  useEffect(() => {
-    if (user?.pendingRequests) {
-      dispatch(setInitialRequests(user.pendingRequests));
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user?._id) {
-      // 🔹 connect socket
-      connectSocket(user._id);
-
-      // 🔹 register socket listeners ONCE
-      if (!listenersRegistered.current) {
-        registerSocketListeners();
-        listenersRegistered.current = true;
-      }
-
-      // 🔹 fetch articles ONLY after login
-      dispatch(getAllArticles());
-    }
-
-    // 🔹 cleanup on logout
-    return () => {
-      disconnectSocket();
-      listenersRegistered.current = false;
-    };
-  }, [user?._id, dispatch]);
-
+function App() {
   return (
-    <>
-      <RouterProvider router={routes} />
-      <ToastContainer position="top-center" autoClose={2000} />
-    </>
+    <Router>
+      <div className="min-h-screen font-sans text-gray-900 overflow-x-hidden">
+        <Navbar />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Protected Routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/create-article" element={<CreateArticle />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:userId" element={<Profile />} />
+          </Route>
+
+          {/* Redirect unknown to home or login */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </Router>
   );
-};
+}
 
 export default App;

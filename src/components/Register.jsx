@@ -5,7 +5,7 @@ import { IoMdCheckmarkCircle } from "react-icons/io";
 import { RxCrossCircled } from "react-icons/rx";
 import { validatePassword } from "val-pass";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../redux/slices/authSlice";
 import { Cropper } from "react-advanced-cropper";
 import "react-advanced-cropper/dist/style.css";
@@ -14,6 +14,7 @@ import { Link, useNavigate } from "react-router-dom";
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loading } = useSelector((state) => state.auth);
   const cropperRef = useRef(null);
 
   const [details, setDetails] = useState({
@@ -107,8 +108,8 @@ const Register = () => {
   return (
     <>
       {/* MAIN PAGE */}
-      <div className="min-h-screen flex items-center justify-center bg-[url('./image1.png')] bg-cover bg-center">
-        <div className="bg-white/20 backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl p-8 w-[90%] max-w-[850px] flex flex-col md:flex-row items-center justify-center gap-10 max-[780px]:my-10">
+      <div className="min-h-screen flex items-center justify-center py-10">
+        <div className="bg-white/20 backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl p-8 w-[90%] max-w-[850px] flex flex-col md:flex-row items-center justify-center gap-10">
           {/* Left side form */}
           <div className="w-full md:w-1/2">
             <h2 className="text-3xl font-semibold text-center bg-gradient-to-r from-purple-600 via-pink-500 to-sky-500 bg-clip-text text-transparent mb-6">
@@ -124,9 +125,9 @@ const Register = () => {
                   placeholder="Full Name"
                   value={details.username}
                   onChange={handleChange}
-                  className="w-full pl-3 pr-10 py-2 border border-purple-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-400 bg-white/60 outline-none text-gray-700 placeholder-gray-500 transition-all duration-300"
+                  className="w-full pl-3 pr-10 py-2 border border-purple-300/50 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-400 bg-white/40 outline-none text-gray-800 placeholder-gray-600 transition-all duration-300 shadow-inner"
                 />
-                <MdDriveFileRenameOutline className="absolute right-3 top-2.5 text-purple-500 text-xl" />
+                <MdDriveFileRenameOutline className="absolute right-3 top-2.5 text-purple-600 text-xl" />
               </div>
 
               {/* Email */}
@@ -137,9 +138,9 @@ const Register = () => {
                   placeholder="@gmail.com"
                   value={details.email}
                   onChange={handleChange}
-                  className="w-full pl-3 pr-10 py-2 border border-purple-300 rounded-lg focus:border-sky-400 focus:ring-2 focus:ring-sky-300 bg-white/60 outline-none text-gray-700 placeholder-gray-500 transition-all duration-300"
+                  className="w-full pl-3 pr-10 py-2 border border-purple-300/50 rounded-lg focus:border-sky-400 focus:ring-2 focus:ring-sky-300 bg-white/40 outline-none text-gray-800 placeholder-gray-600 transition-all duration-300 shadow-inner"
                 />
-                <MdEmail className="absolute right-3 top-2.5 text-purple-500 text-xl" />
+                <MdEmail className="absolute right-3 top-2.5 text-purple-600 text-xl" />
               </div>
 
               {/* Password */}
@@ -150,11 +151,11 @@ const Register = () => {
                   placeholder="Password"
                   value={details.password}
                   onChange={handlePasswordChange}
-                  className="w-full pl-3 pr-10 py-2 border border-purple-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-400 bg-white/60 outline-none text-gray-700 placeholder-gray-500 transition-all duration-300"
+                  className="w-full pl-3 pr-10 py-2 border border-purple-300/50 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-400 bg-white/40 outline-none text-gray-800 placeholder-gray-600 transition-all duration-300 shadow-inner"
                 />
                 <span
                   onClick={() => setShow(!show)}
-                  className="absolute right-3 top-2.5 text-purple-500 text-xl cursor-pointer"
+                  className="absolute right-3 top-2.5 text-purple-600 text-xl cursor-pointer"
                 >
                   {show ? <FaEye /> : <FaEyeSlash />}
                 </span>
@@ -179,22 +180,20 @@ const Register = () => {
                   placeholder="Confirm Password"
                   value={details.confirmPassword}
                   onChange={handleConfirmPasswordChange}
-                  className={`w-full pl-3 pr-10 py-2 border rounded-lg focus:ring-2 bg-white/60 outline-none text-gray-700 placeholder-gray-500 transition-all duration-300 ${
-                    passMatchError
-                      ? "border-red-400 focus:border-red-400 focus:ring-red-300"
-                      : "border-purple-300 focus:border-sky-400 focus:ring-sky-300"
-                  }`}
+                  className={`w-full pl-3 pr-10 py-2 border rounded-lg focus:ring-2 bg-white/40 outline-none text-gray-800 placeholder-gray-600 transition-all duration-300 shadow-inner ${passMatchError
+                    ? "border-red-400 focus:border-red-400 focus:ring-red-300"
+                    : "border-purple-300/50 focus:border-sky-400 focus:ring-sky-300"
+                    }`}
                 />
                 <span className="absolute right-3 top-2.5 text-purple-500 text-xl">
                   {details.password &&
-                  details.confirmPassword &&
-                  !passMatchError ? (
+                    details.confirmPassword &&
+                    !passMatchError ? (
                     <IoMdCheckmarkCircle className="text-green-600" />
                   ) : (
                     <RxCrossCircled
-                      className={`${
-                        passMatchError ? "text-red-600" : "text-purple-500"
-                      }`}
+                      className={`${passMatchError ? "text-red-600" : "text-purple-600"
+                        }`}
                     />
                   )}
                 </span>
@@ -207,17 +206,18 @@ const Register = () => {
 
               <button
                 type="submit"
-                className="w-full py-2 bg-gradient-to-r from-blue-500 to-purple-800 hover:from-purple-800 hover:to-blue-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300 cursor-pointer"
+                disabled={loading}
+                className="w-full py-2 bg-gradient-to-r from-blue-500/80 to-purple-800/80 hover:from-purple-800 hover:to-blue-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm"
               >
-                Register
+                {loading ? "Registering..." : "Register"}
               </button>
             </form>
 
-            <div className="text-center mt-5 text-gray-700 font-medium">
+            <div className="text-center mt-5 text-gray-800 font-medium">
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="text-pink-600 hover:text-pink-700 underline transition-all duration-300"
+                className="text-pink-600 hover:text-pink-700 underline transition-all duration-300 font-bold"
               >
                 Login here
               </Link>
